@@ -1,4 +1,4 @@
-import { GraphQLEnumType, GraphQLInt, GraphQLList, GraphQLObjectType } from "graphql";
+import { GraphQLEnumType, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType } from "graphql";
 
 export const memberIdType = new GraphQLEnumType({
   name: "MemberTypeId",
@@ -14,7 +14,7 @@ export const memberType = new GraphQLObjectType({
     id: { 
       type: memberIdType,
     },
-    discount: { type: GraphQLInt },
+    discount: { type: GraphQLFloat },
     postsLimitPerMonth: { type: GraphQLInt },
   }
 })

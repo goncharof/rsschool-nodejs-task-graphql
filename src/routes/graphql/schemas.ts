@@ -1,10 +1,11 @@
 import { Type } from '@fastify/type-provider-typebox';
-import { GraphQLObjectType, GraphQLSchema } from 'graphql';
+import { GraphQLID, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { FastifyInstance } from 'fastify';
-import { membersType } from './types/member-type.js';
-import { postsType } from './types/post.js';
-import { usersType } from './types/user.js';
-import { profilesType } from './types/profile.js';
+import { memberIdType, memberType, membersType } from './types/member-type.js';
+import { postType, postsType } from './types/post.js';
+import { userType, usersType } from './types/user.js';
+import { profileType, profilesType } from './types/profile.js';
+import { MemberTypeId } from '../member-types/schemas.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -52,6 +53,70 @@ const query = new GraphQLObjectType({
       type: profilesType,
       resolve: (source, args, context: FastifyInstance) => {
         return context.prisma.profile.findMany();
+      }
+    },
+
+    memberType: {
+      type: memberType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve: async (source, { id }: { id: MemberTypeId }, context: FastifyInstance) => {
+        return await context.prisma.memberType.findUnique({
+          where: { id },
+        });
+        // if (memberType === null) {
+        //   throw httpErrors.notFound();
+        // }
+        // return memberType;
+      }
+    },
+
+    post: {
+      type: postType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
+        return await context.prisma.post.findUnique({
+          where: { id },
+        });
+      }
+    },
+
+    user: {
+      type: userType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
+        console.log(await context.prisma.user.findUnique({
+          where: { id },
+        }));
+        
+        return await context.prisma.user.findUnique({
+          where: { id },
+        });
+      }
+    },
+
+    profile: {
+      type: profileType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
+        return await context.prisma.profile.findUnique({
+          where: { id },
+        });
       }
     }
   },
