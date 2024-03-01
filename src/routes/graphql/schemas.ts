@@ -2,6 +2,7 @@ import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { FastifyInstance } from 'fastify';
 import { membersType } from './types/member-type.js';
+import { postsType } from './types/post.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -22,7 +23,7 @@ export const createGqlResponseSchema = {
   ),
 };
 
-const rootQuery = new GraphQLObjectType({
+const query = new GraphQLObjectType({
   name: 'query',
   fields: {
     memberTypes: {
@@ -30,12 +31,18 @@ const rootQuery = new GraphQLObjectType({
       resolve: (source, args, context: FastifyInstance) => {
         return context.prisma.memberType.findMany();
       }
+    },
+    posts: {
+      type: postsType,
+      resolve: (source, args, context: FastifyInstance) => {
+        return context.prisma.post.findMany();
+      }
     }
   },
 })
 
 // Construct a schema, using GraphQL schema language
 export const schema = new GraphQLSchema({
-  query: rootQuery,
+  query,
   // mutation: rootMutation,
 })
