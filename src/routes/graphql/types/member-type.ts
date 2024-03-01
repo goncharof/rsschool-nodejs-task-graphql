@@ -1,16 +1,18 @@
 import { GraphQLEnumType, GraphQLInt, GraphQLList, GraphQLObjectType } from "graphql";
 
-const memberType = new GraphQLObjectType({
+export const memberIdType = new GraphQLEnumType({
+  name: "MemberTypeId",
+  values: {
+    BASIC: { value: 'basic' },
+    BUSINESS: { value: 'business' },
+  },
+})
+
+export const memberType = new GraphQLObjectType({
   name: 'MemberType',
   fields: {
     id: { 
-      type: new GraphQLEnumType({
-        name: "MemberTypeId",
-        values: {
-          BASIC: { value: 'basic' },
-          BUSINESS: { value: 'business' },
-        },
-      }) 
+      type: memberIdType,
     },
     discount: { type: GraphQLInt },
     postsLimitPerMonth: { type: GraphQLInt },
