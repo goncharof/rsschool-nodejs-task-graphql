@@ -3,6 +3,7 @@ import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { FastifyInstance } from 'fastify';
 import { membersType } from './types/member-type.js';
 import { postsType } from './types/post.js';
+import { usersType } from './types/user.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -36,6 +37,13 @@ const query = new GraphQLObjectType({
       type: postsType,
       resolve: (source, args, context: FastifyInstance) => {
         return context.prisma.post.findMany();
+      }
+    },
+
+    users: {
+      type: usersType,
+      resolve: (source, args, context: FastifyInstance) => {
+        return context.prisma.user.findMany();
       }
     }
   },
