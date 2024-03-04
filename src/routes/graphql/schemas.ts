@@ -1,10 +1,10 @@
 import { Type } from '@fastify/type-provider-typebox';
-import { GraphQLID, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { FastifyInstance } from 'fastify';
 import { memberIdType, memberType, membersType } from './types/member-type.js';
-import { postType, postsType } from './types/post.js';
-import { userType, usersType } from './types/user.js';
-import { profileType, profilesType } from './types/profile.js';
+import { CreatePostInput, postType, postsType } from './types/post.js';
+import { CreateUserInput, userType, usersType } from './types/user.js';
+import { CreateProfileInput, profileType, profilesType } from './types/profile.js';
 import { MemberTypeId } from '../member-types/schemas.js';
 import { UUIDType } from './types/uuid.js';
 
@@ -119,8 +119,49 @@ const query = new GraphQLObjectType({
   },
 })
 
+const mutation = new GraphQLObjectType({
+  name: 'mutation',
+  fields: {
+    createPost: {
+      type: postType,
+      args: {
+        dto: { type: new GraphQLNonNull(CreatePostInput) },
+      },
+      resolve: async (source, { dto }, context: FastifyInstance) => {
+        return await context.prisma.post.create({
+          data: dto,
+        });
+      }
+    },
+
+    createUser: {
+      type: userType,
+      args: {
+        dto: { type: new GraphQLNonNull(CreateUserInput) },
+      },
+      resolve: async (source, { dto }, context: FastifyInstance) => {
+        return await context.prisma.user.create({
+          data: dto,
+        });
+      }
+    },
+
+    createProfile: {
+      type: profileType,
+      args: {
+        dto: { type: new GraphQLNonNull(CreateProfileInput) },
+      },
+      resolve: async (source, { dto }, context: FastifyInstance) => {
+        return await context.prisma.profile.create({
+          data: dto,
+        });
+      }
+    }
+  }
+})
+      
 // Construct a schema, using GraphQL schema language
 export const schema = new GraphQLSchema({
   query,
-  // mutation: rootMutation,
+  mutation,
 })
