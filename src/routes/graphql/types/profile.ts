@@ -2,6 +2,7 @@ import { GraphQLObjectType, GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLInpu
 import { UUIDType } from "./uuid.js";
 import { memberIdType, memberType } from "./member-type.js";
 import { FastifyInstance } from "fastify";
+import DataLoader from "dataloader";
 
 export const profileType = new GraphQLObjectType({
   name: 'ProfileType',
@@ -13,11 +14,30 @@ export const profileType = new GraphQLObjectType({
     memberTypeId: { type: memberIdType },
     memberType: {
       type: memberType,
-      resolve: async (profile, args, context: FastifyInstance) => {
-        return await context.prisma.memberType.findUnique({
-          where: { id: profile.memberTypeId },
-        });
-      },
+      // resolve: async (profile, args, context: FastifyInstance) => {
+      //   return await context.prisma.memberType.findUnique({
+      //     where: { id: profile.memberTypeId },
+      //   });
+      // },
+
+      resolve: async (profile, args, context) => {
+        const { dataloaders } = context;
+        let dl = dataloaders.get('memberTypes');
+        // console.log(dataloaders.get("memberTypes"));
+        
+        if (!dl) {
+          dl = new DataLoader(async (ids: any) => {
+            const rows = await context.prisma.memberType.findMany({
+              where: { id: { in: ids } },
+            });
+            const sortedInIdsOrder = ids.map(id => rows.find(x => x.id === id));
+            
+            return sortedInIdsOrder;
+          });
+          dataloaders.set("memberTypes", dl);
+        }
+        return dl.load(profile.memberTypeId, "memberTypes");
+      }
     },
   },
 })
