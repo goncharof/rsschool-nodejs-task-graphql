@@ -3,6 +3,7 @@ import { UUIDType } from "./uuid.js";
 import { memberIdType, memberType } from "./member-type.js";
 import { FastifyInstance } from "fastify";
 import DataLoader from "dataloader";
+import { contextValue } from "../index.js";
 
 export const profileType = new GraphQLObjectType({
   name: 'ProfileType',
@@ -20,15 +21,15 @@ export const profileType = new GraphQLObjectType({
       //   });
       // },
 
-      resolve: async (profile, args, context) => {
+      resolve: async (profile, args, context: contextValue) => {
         const { dataloaders } = context;
         let dl = dataloaders.get('memberTypes');
         // console.log(dataloaders.get("memberTypes"));
         
         if (!dl) {
-          dl = new DataLoader(async (ids: any) => {
+          dl = new DataLoader(async (ids: readonly string[]) => {
             const rows = await context.prisma.memberType.findMany({
-              where: { id: { in: ids } },
+              where: { id: { in: [...ids] } },
             });
             const sortedInIdsOrder = ids.map(id => rows.find(x => x.id === id));
             
@@ -36,7 +37,7 @@ export const profileType = new GraphQLObjectType({
           });
           dataloaders.set("memberTypes", dl);
         }
-        return dl.load(profile.memberTypeId, "memberTypes");
+        return dl.load(profile.memberTypeId);
       }
     },
   },
