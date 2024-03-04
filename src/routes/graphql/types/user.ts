@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from "graphql";
+import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLInputObjectType, GraphQLFloat } from "graphql";
 import { UUIDType } from "./uuid.js";
 import { profileType } from "./profile.js";
 import { FastifyInstance } from "fastify";
@@ -9,7 +9,7 @@ export const userType = new GraphQLObjectType({
   fields:() => ({
     id: { type: UUIDType },
     name: { type: GraphQLString },
-    balance: { type: GraphQLInt },
+    balance: { type: GraphQLFloat },
     profile: {
       type: profileType,
       resolve: async (user, args, context: FastifyInstance) => {
@@ -58,3 +58,11 @@ export const userType = new GraphQLObjectType({
 })
 
 export const usersType = new GraphQLList(userType)
+
+export const CreateUserInput = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: {
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    balance: { type: new GraphQLNonNull(GraphQLFloat) },
+  },
+});
