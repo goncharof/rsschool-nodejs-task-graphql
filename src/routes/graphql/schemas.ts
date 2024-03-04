@@ -97,10 +97,6 @@ const query = new GraphQLObjectType({
         },
       },
       resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
-        console.log(await context.prisma.user.findUnique({
-          where: { id },
-        }));
-        
         return await context.prisma.user.findUnique({
           where: { id },
         });
