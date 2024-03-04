@@ -1,10 +1,10 @@
 import { Type } from '@fastify/type-provider-typebox';
-import { GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { FastifyInstance } from 'fastify';
 import { memberIdType, memberType, membersType } from './types/member-type.js';
-import { CreatePostInput, postType, postsType } from './types/post.js';
-import { CreateUserInput, userType, usersType } from './types/user.js';
-import { CreateProfileInput, profileType, profilesType } from './types/profile.js';
+import { ChangePostInput, CreatePostInput, postType, postsType } from './types/post.js';
+import { CreateUserInput, ChangeUserInput, userType, usersType } from './types/user.js';
+import { CreateProfileInput, ChangeProfileInput, profileType, profilesType } from './types/profile.js';
 import { MemberTypeId } from '../member-types/schemas.js';
 import { UUIDType } from './types/uuid.js';
 
@@ -155,6 +155,138 @@ const mutation = new GraphQLObjectType({
         return await context.prisma.profile.create({
           data: dto,
         });
+      }
+    },
+
+    deletePost: {
+      type: GraphQLBoolean,
+      args: {
+        id: {
+          type: new GraphQLNonNull(UUIDType),
+        },
+      },
+      resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
+        await context.prisma.post.delete({
+          where: { id },
+        });
+
+        return null;
+      }
+    },
+
+    deleteProfile: {
+      type: GraphQLBoolean,
+      args: {
+        id: {
+          type: new GraphQLNonNull(UUIDType),
+        },
+      },
+      resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
+        await context.prisma.profile.delete({
+          where: { id },
+        });
+
+        return null;
+      }
+    },
+
+    deleteUser: {
+      type: GraphQLBoolean,
+      args: {
+        id: {
+          type: new GraphQLNonNull(UUIDType),
+        },
+      },
+      resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
+        await context.prisma.user.delete({
+          where: { id },
+        });
+
+        return null;
+      }
+    },
+
+    changePost: {
+      type: postType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangePostInput) }
+      },
+      resolve: async (source, { id, dto }, context: FastifyInstance) => {
+        return await context.prisma.post.update({
+          where: { id },
+          data: dto
+        });
+      }
+    },
+
+    changeProfile: {
+      type: profileType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangeProfileInput) }
+      },
+      resolve: async (source, { id, dto }, context: FastifyInstance) => {
+        return await context.prisma.profile.update({
+          where: { id },
+          data: dto
+        });
+      }
+    },
+
+    changeUser: {
+      type: userType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangeUserInput) }
+      },
+      resolve: async (source, { id, dto }, context: FastifyInstance) => {
+        return await context.prisma.user.update({
+          where: { id },
+          data: dto
+        });
+      }
+    },
+
+    subscribeTo: {
+      type: userType,
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (source, { userId, authorId }, context: FastifyInstance) => {
+        return context.prisma.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            userSubscribedTo: {
+              create: {
+                authorId: authorId,
+              },
+            },
+          },
+        });
+      }
+    },
+
+    unsubscribeFrom: {
+      type: GraphQLBoolean,
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (source, { userId, authorId }, context: FastifyInstance) => {
+        await context.prisma.subscribersOnAuthors.delete({
+          where: {
+            subscriberId_authorId: {
+              subscriberId: userId,
+              authorId: authorId,
+            },
+          },
+        });
+
+        return null;
       }
     }
   }
