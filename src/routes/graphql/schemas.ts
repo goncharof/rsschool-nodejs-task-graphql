@@ -6,6 +6,7 @@ import { postType, postsType } from './types/post.js';
 import { userType, usersType } from './types/user.js';
 import { profileType, profilesType } from './types/profile.js';
 import { MemberTypeId } from '../member-types/schemas.js';
+import { UUIDType } from './types/uuid.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -60,7 +61,7 @@ const query = new GraphQLObjectType({
       type: memberType,
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLString),
+          type: new GraphQLNonNull(memberIdType),
         },
       },
       resolve: async (source, { id }: { id: MemberTypeId }, context: FastifyInstance) => {
@@ -78,7 +79,7 @@ const query = new GraphQLObjectType({
       type: postType,
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLString),
+          type: new GraphQLNonNull(UUIDType),
         },
       },
       resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
@@ -92,7 +93,7 @@ const query = new GraphQLObjectType({
       type: userType,
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLString),
+          type: new GraphQLNonNull(UUIDType),
         },
       },
       resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
@@ -110,7 +111,7 @@ const query = new GraphQLObjectType({
       type: profileType,
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLString),
+          type: new GraphQLNonNull(UUIDType),
         },
       },
       resolve: async (source, { id }: { id: string }, context: FastifyInstance) => {
