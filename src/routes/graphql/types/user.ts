@@ -1,8 +1,14 @@
-import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLInputObjectType, GraphQLFloat } from "graphql";
+import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLNonNull, GraphQLInputObjectType, GraphQLFloat } from "graphql";
 import { UUIDType } from "./uuid.js";
 import { profileType } from "./profile.js";
 import { FastifyInstance } from "fastify";
 import { postType } from "./post.js";
+
+interface User {
+  id: string;
+  name: string;
+  balance: number;
+}
 
 export const userType = new GraphQLObjectType({
   name: 'UserType',
@@ -12,7 +18,7 @@ export const userType = new GraphQLObjectType({
     balance: { type: GraphQLFloat },
     profile: {
       type: profileType,
-      resolve: async (user, args, context: FastifyInstance) => {
+      resolve: async (user: User, args, context: FastifyInstance) => {
         return await context.prisma.profile.findUnique({
           where: { userId: user.id },
         });
