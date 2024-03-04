@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLInt, GraphQLList } from "graphql";
 import { UUIDType } from "./uuid.js";
-import { memberIdType } from "./member-type.js";
+import { memberIdType, memberType } from "./member-type.js";
+import { FastifyInstance } from "fastify";
 
 export const profileType = new GraphQLObjectType({
   name: 'ProfileType',
@@ -10,6 +11,14 @@ export const profileType = new GraphQLObjectType({
     yearOfBirth: { type: GraphQLInt },
     userId: { type: UUIDType },
     memberTypeId: { type: memberIdType },
+    memberType: {
+      type: memberType,
+      resolve: async (profile, args, context: FastifyInstance) => {
+        return await context.prisma.memberType.findUnique({
+          where: { id: profile.memberTypeId },
+        });
+      },
+    },
   },
 })
 
